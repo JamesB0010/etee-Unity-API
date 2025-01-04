@@ -8,14 +8,6 @@ public class GestureUI : MonoBehaviour
     public GameObject[] baseGesturesL;                                 // Base gestures from first etee version.
     public GameObject[] baseGesturesR;
 
-    public eteeAPI api;                                             // Etee api to read events from the dongle.
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        this.api = eteeAPI.instance;
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -33,19 +25,19 @@ public class GestureUI : MonoBehaviour
         bool[] events = new bool[7];
 
         // check grip gesture.
-        events[0] = api.GetIsSqueezeGesture(device);
+        events[0] = eteeAPI.GetIsSqueezeGesture(device);
 
         // check point independent gesture.
-        events[1] = api.GetIsPointIndependentGesture(device);
+        events[1] = eteeAPI.GetIsPointIndependentGesture(device);
 
         // check pinch trackpad gesture.
-        events[2] = api.GetIsPinchTrackpadGesture(device);
+        events[2] = eteeAPI.GetIsPinchTrackpadGesture(device);
 
         // check pinch thumbfinger gesture
-        events[5] = api.GetIsPinchThumbFingerGesture(device);
+        events[5] = eteeAPI.GetIsPinchThumbFingerGesture(device);
 
         // check point exclude trackpad gesture.
-        events[6] = api.GetIsPointExcludeTrackpadGesture(device);
+        events[6] = eteeAPI.GetIsPointExcludeTrackpadGesture(device);
 
         // send data to left device.
         if (device == 0)

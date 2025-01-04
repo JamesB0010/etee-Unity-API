@@ -8,7 +8,6 @@ using UnityEngine;
 public class HandController : MonoBehaviour {
 
     [HideInInspector] public eteeDevice device = null;
-    public eteeAPI api = null;
 
     public bool isLeft;
     private Quaternion defaultHandPosition = Quaternion.identity;
@@ -129,7 +128,7 @@ public class HandController : MonoBehaviour {
     void Start () {
         Init();
         defaultHandPosition = transform.localRotation;
-        api.CalibrateFingers();
+        eteeAPI.CalibrateFingers();
     }
 
     Coroutine calibrateHandsCoroutine;
@@ -164,8 +163,8 @@ public class HandController : MonoBehaviour {
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     private void UpdateFingerData(int device)
     {
-        float[] pullData = api.GetAllFingersPull(device);
-        float[] forceData = api.GetAllFingersForce(device);
+        float[] pullData = eteeAPI.GetAllFingersPull(device);
+        float[] forceData = eteeAPI.GetAllFingersForce(device);
 
         if (device == 0)
         {
@@ -209,8 +208,7 @@ public class HandController : MonoBehaviour {
     /// </summary>
     private void Init()
     {
-        this.api = eteeAPI.instance;
-        this.device = this.isLeft ? this.api.leftDevice : this.api.rightDevice;
+        this.device = this.isLeft ? eteeAPI.LeftDevice : eteeAPI.RightDevice;
         
         // get animator component from the hand gameObject.
         anim = GetComponent<Animator>();

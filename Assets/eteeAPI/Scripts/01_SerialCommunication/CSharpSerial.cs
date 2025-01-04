@@ -46,16 +46,16 @@ public class CSharpSerial
     private bool dongleConnected = false;                       // Flag - true only when the dongle is connected and detected by the UI.
 
     [Header("Flags")]
-    private int rightCounter;                                       // Internal counter to check if no data is coming from the right hand.
-    private int leftCounter;                                        // Internal counter to check if no data is coming from the left hand.
+    private int rightCounter;                                   // Internal counter to check if no data is coming from the right hand.
+    private int leftCounter;                                    // Internal counter to check if no data is coming from the left hand.
 
     private bool requestingOffsetLeft = true;
     private bool requestingOffsetRight = true;
 
-    private bool sendVibrationToLeft = false;                       // Flag to check whether we send vibration to left hand device.
-    private bool sendVibrationToRight = false;                      // Flag to check whether we send vibration to right hand device.
-    private bool checkPorts = false;                                // Flag to control whether the dongle ports can be checked by the UI ( because in initialization the port has not serial metods available )
-    private int os;                                                 // This variable checks the current user operative system. Then it is used to dinamycally get the dongle port name.
+    private bool sendVibrationToLeft = false;                   // Flag to check whether we send vibration to left hand device.
+    private bool sendVibrationToRight = false;                  // Flag to check whether we send vibration to right hand device.
+    private bool checkPorts = false;                            // Flag to control whether the dongle ports can be checked by the UI ( because in initialization the port has not serial metods available )
+    private int os;                                             // This variable checks the current user operative system. Then it is used to dinamycally get the dongle port name.
 
     [Header("Serial commands")]
     // commands to be sent to the device - they are used for program logic purposess (e.g. vibration, calibration).

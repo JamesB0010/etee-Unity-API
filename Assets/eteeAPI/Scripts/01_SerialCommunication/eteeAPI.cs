@@ -6,10 +6,31 @@ using UnityEngine;
 /// through Get() commands.
 /// </summary>
 public class eteeAPI {
-    public static eteeAPI instance;                                 // Static instance to make this API available in the whole application scope.
+    private static eteeAPI instance;                                 // Static instance to make this API available in the whole application scope.
     public CSharpSerial serialRead;                                 // Serial reader class component reference.
+
+    public static CSharpSerial SerialRead
+    {
+        get => instance.serialRead;
+        set => instance.serialRead = value;
+    }
     public eteeDevice leftDevice;                                   // etee left device from where the data is retrieved class component refernece.
+
+    public static eteeDevice LeftDevice
+    {
+        get => instance.leftDevice; // Static accessor to the instances Left device
+
+        set => instance.leftDevice = value; //static setter to the instances left device
+    }
+
     public eteeDevice rightDevice;                                  // etee right device from where the data is retrieved class componer reference.
+    public static eteeDevice RightDevice
+    {
+        get => instance.rightDevice; // static getter to the instances Right device
+
+        set => instance.rightDevice = value; //static setter to the instances right device
+    }
+
 
     private eteeAPI() {}
 
@@ -225,12 +246,16 @@ public class eteeAPI {
         return value;
     }
 
+    public static float[] GetAllFingersPull(int device)
+    {
+        return instance._GetAllFingersPull(device);
+    }
     /// <summary>
     /// Get all fingers data pull pressure data
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>float[]</returns>
-    public float[] GetAllFingersPull(int device)
+    private float[] _GetAllFingersPull(int device)
     {
 
         if (device > 1)
@@ -242,12 +267,17 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.fingerPullData : rightDevice.fingerPullData;
     }
 
+    public static float[] GetAllFingersForce(int device)
+    {
+        return instance._GetAllFingersForce(device);
+    }
+    
     /// <summary>
     /// Get all fingers data force pressure data
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>float[]</returns>
-    public float[] GetAllFingersForce(int device)
+    private float[] _GetAllFingersForce(int device)
     {
         if (device > 1)
         {
@@ -259,10 +289,15 @@ public class eteeAPI {
     }
 
 
+    public static void CalibrateFingers()
+    {
+        instance._CalibrateFingers();
+    }
+
     /// <summary>
     /// Starts calibration of fingers.
     /// </summary>
-    public void CalibrateFingers()
+    private void _CalibrateFingers()
     {
         serialRead.SendStartCalibrationCommand();
     }
@@ -672,6 +707,10 @@ public class eteeAPI {
 
     // ==================================== Gestures ====================================
 
+    public static bool GetIsSqueezeGesture(int device)
+    {
+        return instance._GetIsSqueezeGesture(device);
+    }
     /// <summary>
     /// Checks if a squeeze
     /// gesture is being performed
@@ -679,7 +718,7 @@ public class eteeAPI {
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>bool</returns>
-    public bool GetIsSqueezeGesture(int device)
+    private bool _GetIsSqueezeGesture(int device)
     {
         // check that the device number is correct.
         if (device > 1)
@@ -689,6 +728,11 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.squeeze : rightDevice.squeeze;
     }
 
+    public static bool GetIsPointIndependentGesture(int device)
+    {
+        return instance._GetIsPointIndependentGesture(device);
+    }
+
     /// <summary>
     /// Check if the user
     /// is performing a Point Independent
@@ -696,7 +740,7 @@ public class eteeAPI {
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>bool</returns>
-    public bool GetIsPointIndependentGesture(int device)
+    private bool _GetIsPointIndependentGesture(int device)
     {
 
         // check if device number is correct.
@@ -708,6 +752,11 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.pointIndependent : rightDevice.pointIndependent;
     }
 
+    public static bool GetIsPointExcludeTrackpadGesture(int device)
+    {
+        return instance._GetIsPointExcludeTrackpadGesture(device);
+    }
+    
     /// <summary>
     /// Check if the user
     /// is performing a Point 
@@ -715,7 +764,7 @@ public class eteeAPI {
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>bool</returns>
-    public bool GetIsPointExcludeTrackpadGesture(int device)
+    private bool _GetIsPointExcludeTrackpadGesture(int device)
     {
 
         // check if device number is correct.
@@ -727,6 +776,11 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.pointExcludeTrackpad : rightDevice.pointExcludeTrackpad;
     }
 
+    public static bool GetIsPinchTrackpadGesture(int device)
+    {
+        return instance._GetIsPinchTrackpadGesture(device);
+    }
+    
     /// <summary>
     /// Check if the user 
     /// is performing a pinch trackpad
@@ -734,7 +788,7 @@ public class eteeAPI {
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>bool</returns>
-    public bool GetIsPinchTrackpadGesture(int device) 
+    private bool _GetIsPinchTrackpadGesture(int device) 
     {
 
         // check if device number is correct.
@@ -746,6 +800,10 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.pinchTrackpad : rightDevice.pinchTrackpad;
     }
 
+    public static bool GetIsPinchThumbFingerGesture(int device)
+    {
+        return instance._GetIsPinchThumbFingerGesture(device);
+    }
     /// <summary>
     /// Check if the user 
     /// is performing a pinch thumbfinger
@@ -753,7 +811,7 @@ public class eteeAPI {
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>bool</returns>
-    public bool GetIsPinchThumbFingerGesture(int device)
+    public bool _GetIsPinchThumbFingerGesture(int device)
     {
         
         // check if device number is correct

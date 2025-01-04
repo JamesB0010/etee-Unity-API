@@ -8,34 +8,38 @@ using UnityEngine.LowLevel;
 //thanks to git-ammend for presenting how to inject custom processes into the player loop https://www.youtube.com/watch?v=ilvmOQtl57c
 
 
-internal static class CSharpSerialBootstrapper
+namespace eteePlayerLoop
+{
+/// <summary>
+/// This class is responsible for injecting the CSharpSerialManagers fixed update and update methods into the
+/// UnityEngine Player Loop
+/// </summary>
+public static class CSharpSerialBootstrapper
 {
     private static PlayerLoopSystem serialSystemFixedUpdateLoop;
     private static PlayerLoopSystem serialSystemUpdateLoop;
     
-    internal static void Init()
+    public static void Init()
     {
-        var currentPlayerLoop = InsertLoopSystemsIntoPlayerloop();
+        var currentPlayerLoop = InsertLoopSystemsIntoPlayerLoop();
 
-
-        PlayerLoopUtils.PrintPlayerLoop(currentPlayerLoop);
+        //PlayerLoopUtils.PrintPlayerLoop(currentPlayerLoop);
         
-        
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         EditorApplication.playModeStateChanged -= OnPlayModeChanged;
         EditorApplication.playModeStateChanged += OnPlayModeChanged;
 #endif
     }
 
 
-    private static PlayerLoopSystem InsertLoopSystemsIntoPlayerloop()
+    private static PlayerLoopSystem InsertLoopSystemsIntoPlayerLoop()
     {
         PlayerLoopSystem currentPlayerLoop = PlayerLoop.GetCurrentPlayerLoop();
 
         try
         {
-            InsertCSharpSerialFixedUpdateManager<UnityEngine.PlayerLoop.FixedUpdate>(ref currentPlayerLoop, 0);
-            InsertCSharpSerialUpdateManager<UnityEngine.PlayerLoop.Update>(ref currentPlayerLoop, 0);
+            InsertCSharpSerialFixedUpdateManager(ref currentPlayerLoop);
+            InsertCSharpSerialUpdateManager(ref currentPlayerLoop);
         }
         catch (Exception e)
         {
@@ -46,10 +50,10 @@ internal static class CSharpSerialBootstrapper
         return currentPlayerLoop;
     }
 
-    static void InsertCSharpSerialFixedUpdateManager<T>(ref PlayerLoopSystem loop, int index)
+    static void InsertCSharpSerialFixedUpdateManager(ref PlayerLoopSystem loop, int index = 0)
     {
         CreateFixedUpdateSystem();
-        bool insertionFailed = !PlayerLoopUtils.InsertSystem<T>(ref loop, in CSharpSerialBootstrapper.serialSystemFixedUpdateLoop, index);
+        bool insertionFailed = !PlayerLoopUtils.InsertSystem<UnityEngine.PlayerLoop.FixedUpdate>(ref loop, in CSharpSerialBootstrapper.serialSystemFixedUpdateLoop, index);
         if (insertionFailed)
             throw (new Exception("CSharpSerialManager not initialized, unable to register CSharpSerialManager into the fixed update loop"));
     }
@@ -61,16 +65,16 @@ internal static class CSharpSerialBootstrapper
     /// <param name="index">where in the subsystem we want to position this</param>
     /// <typeparam name="T">T represents what system we want our system to be a subsystem of</typeparam>
     /// <returns></returns>
-    static void InsertCSharpSerialUpdateManager<T>(ref PlayerLoopSystem loop, int index)
+    static void InsertCSharpSerialUpdateManager(ref PlayerLoopSystem loop, int index = 0)
     {
         CreateUpdateSystem();
-        bool insertionFailed = !PlayerLoopUtils.InsertSystem<T>(ref loop, CSharpSerialBootstrapper.serialSystemUpdateLoop, index);
+        bool insertionFailed = !PlayerLoopUtils.InsertSystem<UnityEngine.PlayerLoop.Update>(ref loop, CSharpSerialBootstrapper.serialSystemUpdateLoop, index);
         if (insertionFailed)
             throw (new Exception("CSharpSerialManager not initialized, unable to register CSharpSerialManager into the update loop"));
     }
     private static void CreateFixedUpdateSystem()
     {
-        CSharpSerialBootstrapper.serialSystemFixedUpdateLoop = new PlayerLoopSystem()
+        serialSystemFixedUpdateLoop = new PlayerLoopSystem()
         {
             type = typeof(CSharpSerialManager),
             updateDelegate = CSharpSerialManager.FixedUpdateSerial,
@@ -80,7 +84,7 @@ internal static class CSharpSerialBootstrapper
     
     private static void CreateUpdateSystem()
     {
-        CSharpSerialBootstrapper.serialSystemUpdateLoop = new PlayerLoopSystem()
+        serialSystemUpdateLoop = new PlayerLoopSystem()
         {
             type = typeof(CSharpSerialManager),
             updateDelegate = CSharpSerialManager.UpdateSerial,
@@ -88,14 +92,14 @@ internal static class CSharpSerialBootstrapper
         };
     }
 
-    static void RemoveCSharpSerialFixedUpdateManager<T>(ref PlayerLoopSystem loop)
+    static void RemoveCSharpSerialFixedUpdateManager(ref PlayerLoopSystem loop)
     {
-        PlayerLoopUtils.RemoveSystem<T>(ref loop, in serialSystemFixedUpdateLoop);
+        PlayerLoopUtils.RemoveSystem<UnityEngine.PlayerLoop.FixedUpdate>(ref loop, in serialSystemFixedUpdateLoop);
     }
 
-    static void RemoveCSharpSerialUpdateManager<T>(ref PlayerLoopSystem loop)
+    static void RemoveCSharpSerialUpdateManager(ref PlayerLoopSystem loop)
     {
-        PlayerLoopUtils.RemoveSystem<T>(ref loop, in serialSystemUpdateLoop);
+        PlayerLoopUtils.RemoveSystem<UnityEngine.PlayerLoop.Update>(ref loop, in serialSystemUpdateLoop);
     }
     
     private static void OnPlayModeChanged(PlayModeStateChange state)
@@ -112,10 +116,11 @@ internal static class CSharpSerialBootstrapper
     private static PlayerLoopSystem RemoveCSharpSerialManager()
     {
         PlayerLoopSystem currentPlayerloop = PlayerLoop.GetCurrentPlayerLoop();
-        RemoveCSharpSerialFixedUpdateManager<UnityEngine.PlayerLoop.FixedUpdate>(ref currentPlayerloop);
-        RemoveCSharpSerialUpdateManager<UnityEngine.PlayerLoop.Update>(ref currentPlayerloop);
+        RemoveCSharpSerialFixedUpdateManager(ref currentPlayerloop);
+        RemoveCSharpSerialUpdateManager(ref currentPlayerloop);
         return currentPlayerloop;
     }
+}
 }
 
 
