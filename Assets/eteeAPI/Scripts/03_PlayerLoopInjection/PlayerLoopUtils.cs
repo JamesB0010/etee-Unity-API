@@ -7,7 +7,12 @@ using UnityEngine.LowLevel;
 
 public static class PlayerLoopUtils
 {
-    // Remove a system from the player loop
+    /// <summary>
+    /// Remove a system from the player loop
+    /// </summary>
+    /// <param name="loop">the root loop to start looking from</param>
+    /// <param name="systemToRemove">the system to remove</param>
+    /// <typeparam name="T">The parent system of loop</typeparam>
     public static void RemoveSystem<T>(ref PlayerLoopSystem loop, in PlayerLoopSystem systemToRemove)
     {
         bool reachedLeafNode = loop.subSystemList == null;
@@ -17,8 +22,7 @@ public static class PlayerLoopUtils
         var playerLoopSystemList = new List<PlayerLoopSystem>(loop.subSystemList);
         for (int i = 0; i < playerLoopSystemList.Count; ++i)
         {
-            bool systemToRemoveFound = playerLoopSystemList[i].type == systemToRemove.type &&
-                                       playerLoopSystemList[i].updateDelegate == systemToRemove.updateDelegate;
+            bool systemToRemoveFound = playerLoopSystemList[i].type == systemToRemove.type && playerLoopSystemList[i].updateDelegate == systemToRemove.updateDelegate;
             if (systemToRemoveFound)
             {
                 //remove the system
@@ -32,6 +36,12 @@ public static class PlayerLoopUtils
         HandleSubSystemLoopForRemoval<T>(ref loop, systemToRemove);
     }
 
+    /// <summary>
+    /// For each child of the loop recursivley call the removeSystem function
+    /// </summary>
+    /// <param name="loop">the current Player loop system</param>
+    /// <param name="systemToRemove">the system to remove</param>
+    /// <typeparam name="T">the parent of loop</typeparam>
     static void HandleSubSystemLoopForRemoval<T>(ref PlayerLoopSystem loop, PlayerLoopSystem systemToRemove)
     {
         bool leafNodeReached = loop.subSystemList == null;
