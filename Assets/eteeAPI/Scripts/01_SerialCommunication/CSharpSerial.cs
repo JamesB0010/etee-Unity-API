@@ -13,7 +13,8 @@ using UnityEngine.Analytics;
 /// Retrieves device and port statuses. Also initialises 
 /// device calibration and data streaming commands.
 /// </summary>
-public class CSharpSerial : MonoBehaviour {
+public class CSharpSerial
+{
     Thread thread;                                              // Separate thread used to read bytes data from the dongle.
     SerialPort stream;                                          // Stream object for connecting the UI to the dongle. This connection is being handle in a different thread.
 
@@ -82,15 +83,26 @@ public class CSharpSerial : MonoBehaviour {
     public Vector3 magRightOffset;
 
 
-    // Start is called before the first frame update
-    void Start()
+    public CSharpSerial()
     {
-        Init();
+        // get current user operative system to detect the port where the dongle is connected.
+        os = (int)System.Environment.OSVersion.Platform;
+        
+        // start separate thread to read data from the dongle.
+        StartThread();
+        
+        // set internal flags to check when the devices are connected.
+        leftConnected = false;
+        rightConnected = false;
+        
+        // set data counter to initial value.
+        count = 0;
     }
 
     // Update is called once per frame
-    void Update()
+    public void Update()
     {
+        Debug.Log("Update");
         // check if there is data to send to the devices in the queues.
         // change this method by any used in your app logic.
         ReadingQueues();
@@ -129,31 +141,11 @@ public class CSharpSerial : MonoBehaviour {
     /// This function is called every fixed framerate frame, if the MonoBehaviour is enabled.
     /// </summary>
     /// <returns>void</returns>
-    void FixedUpdate()
+    public void FixedUpdate()
     {
+        Debug.Log("Fixed Update");
         // update no device activity counters.
         UpdateDisconnectedCounters();
-    }
-
-    /// <summary>
-    /// Init class method.
-    /// </summary>
-    /// <returns>void</returns>
-    private void Init()
-    {
-
-        // get current user operative system to detect the port where the dongle is connected.
-        os = (int)System.Environment.OSVersion.Platform;
-
-        // start separate thread to read data from the dongle.
-        StartThread();
-
-        // set internal flags to check when the devices are connected.
-        leftConnected = false;
-        rightConnected = false;
-
-        // set data counter to initial value.
-        count = 0;
     }
 
     // ==================================== Connection ====================================
@@ -516,7 +508,6 @@ public class CSharpSerial : MonoBehaviour {
     /// <returns></returns>
     private IEnumerator SendCalibratedGyroOffsetLeftCoroutine(Vector3 offset)
     {
-
         yield return new WaitForSeconds(0.3f);
         string message = "BL+gf=a" + offset.x.ToString() + "," + offset.y.ToString() + "," + offset.z.ToString();
         SendCommandToDevice(message);
@@ -532,7 +523,6 @@ public class CSharpSerial : MonoBehaviour {
     public void SendCalibratedGyroOffsetLeft(Vector3 offset)
     {
         StartCoroutine(SendCalibratedGyroOffsetLeftCoroutine(offset));
-
     }
 
     /// <summary>
@@ -557,7 +547,6 @@ public class CSharpSerial : MonoBehaviour {
     public void SendCalibratedGyroOffsetRight(Vector3 offset)
     {
         StartCoroutine(SendCalibratedGyroOffsetRightCoroutine(offset));
-
     }
 
     /// <summary>
@@ -596,7 +585,6 @@ public class CSharpSerial : MonoBehaviour {
     public void SendCalibratedMagOffsetLeft(Vector3 offset)
     {
         StartCoroutine(SendCalibratedMagOffsetLeftCoroutine(offset));
-
     }
 
     /// <summary>
