@@ -6,45 +6,53 @@ using UnityEngine;
 /// through Get() commands.
 /// </summary>
 public class eteeAPI {
-    private static eteeAPI instance;                                 // Static instance to make this API available in the whole application scope.
+    private static eteeAPI instance;                                 // Singleton pattern used here static properties and methods used to access fields and methods on this instance
     public CSharpSerial serialRead;                                 // Serial reader class component reference.
 
-    public static CSharpSerial SerialRead
+    public static CSharpSerial SerialRead                           // Static get and set to expose the instance serial read to users 
     {
         get => instance.serialRead;
         set => instance.serialRead = value;
     }
+    
+    
     public eteeDevice leftDevice;                                   // etee left device from where the data is retrieved class component refernece.
 
-    public static eteeDevice LeftDevice
+    public static eteeDevice LeftDevice                             // Static get and set to expose the instance left device to users
     {
-        get => instance.leftDevice; // Static accessor to the instances Left device
+        get => instance.leftDevice;
 
-        set => instance.leftDevice = value; //static setter to the instances left device
+        set => instance.leftDevice = value; 
     }
 
-    public eteeDevice rightDevice;                                  // etee right device from where the data is retrieved class componer reference.
-    public static eteeDevice RightDevice
+    public eteeDevice rightDevice;                                  // etee right device from where the data is retrieved class component reference.
+    public static eteeDevice RightDevice                            // static get and set to expose the instance right device to users
     {
-        get => instance.rightDevice; // static getter to the instances Right device
+        get => instance.rightDevice; 
 
-        set => instance.rightDevice = value; //static setter to the instances right device
+        set => instance.rightDevice = value; 
     }
 
 
-    private eteeAPI() {}
+    private eteeAPI() {}                                            // Private constructor ensures control over when this class is instantiated
 
 
     static eteeAPI()
     {
-        instance = new eteeAPI();
+        instance = new eteeAPI();                                   // As we are using the singleton pattern we will allow the static constructor to instantiate our instance
     }
 
+
+    public static void ResetControllerValues(int device)
+    {
+        instance._ResetControllerValues(device);
+    }
+    
     /// <summary>
     /// Reset the controller parameters to 0
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
-    public void ResetControllerValues(int device)
+    private void _ResetControllerValues(int device)
     {
         Debug.Log("Resetting controller values in API");
         if (device == 0)
@@ -58,10 +66,15 @@ public class eteeAPI {
         }
     }
 
+    public static void RestartStreaming()
+    {
+        instance._RestartStreaming();
+    }
+
     /// <summary>
     /// Restart data streaming on controllers
     /// </summary>
-    public void RestartStreaming()
+    private void _RestartStreaming()
     {
         serialRead.DisableDataStreaming();
         serialRead.EnableDataStreaming();
@@ -74,9 +87,9 @@ public class eteeAPI {
     /// connected.
     /// </summary>
     /// <returns>bool</returns>
-    public bool IsDongleDeviceConnected()
+    public static bool IsDongleDeviceConnected()
     {
-        return serialRead.IsDongleConnected();
+        return instance.serialRead.IsDongleConnected();
     }
 
     /// <summary>
@@ -85,9 +98,14 @@ public class eteeAPI {
     /// data thread.
     /// </summary>
     /// <returns>void</returns>
-    public void Disconnect()
+    public static void Disconnect()
     {
-        serialRead.StopThread();
+        instance.serialRead.StopThread();
+    }
+
+    public static bool IsBothDevicesConnected()
+    {
+        return instance._IsBothDevicesConnected();
     }
 
     /// <summary>
@@ -95,7 +113,7 @@ public class eteeAPI {
     /// are connected.
     /// </summary>
     /// <returns>bool</returns>
-    public bool IsBothDevicesConnected()
+    private bool _IsBothDevicesConnected()
     {
         if(serialRead.IsDeviceConnected(0) && serialRead.IsDeviceConnected(1))
         {
@@ -107,12 +125,17 @@ public class eteeAPI {
         }
     }
 
+    public static bool IsAnyDeviceConnected()
+    {
+        return instance._IsAnyDeviceConnected();
+    }
+
     /// <summary>
     /// Checks if either controller 
     /// is connected.
     /// </summary>
     /// <returns>bool</returns>
-    public bool IsAnyDeviceConnected()
+    private bool _IsAnyDeviceConnected()
     {
         if (serialRead.IsDeviceConnected(0) || serialRead.IsDeviceConnected(1))
         {
@@ -128,10 +151,10 @@ public class eteeAPI {
     /// is connected.
     /// </summary>
     /// <returns>bool</returns>
-    public bool IsLeftDeviceConnected()
+    public static bool IsLeftDeviceConnected()
     {
         // 0 is used for left device as standard in all the etee api library.
-        return serialRead.IsDeviceConnected(0);
+        return instance.serialRead.IsDeviceConnected(0);
     }
 
     /// <summary>
@@ -139,10 +162,10 @@ public class eteeAPI {
     /// is connected.
     /// </summary>
     /// <returns>bool</returns>
-    public bool IsRightDeviceConnected()
+    public static bool IsRightDeviceConnected()
     {
         // 1 us used for right device as standard in all the etee api library.
-        return serialRead.IsDeviceConnected(1);
+        return instance.serialRead.IsDeviceConnected(1);
     }
 
     /// <summary>
@@ -150,9 +173,14 @@ public class eteeAPI {
     /// to establish the connection.
     /// </summary>
     /// <returns>string</returns>
-    public string GetPortName()
+    public static string GetPortName()
     {
-        return serialRead.serialPort;
+        return instance.serialRead.serialPort;
+    }
+
+    public static float GetBattery(int device)
+    {
+        return instance._GetBattery(device);
     }
 
     /// <summary>
@@ -160,7 +188,7 @@ public class eteeAPI {
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>float</returns>
-    public float GetBattery(int device)
+    private float _GetBattery(int device)
     {
 
         // check the parameter is correct.
@@ -172,6 +200,13 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.battery : rightDevice.battery;
     }
 
+
+    public static bool CheckPort(string portName)
+    {
+        return instance._CheckPort(portName);
+    }
+    
+    
     /// <summary>
     /// Wrapper method to check to
     /// which port the dongle is
@@ -179,7 +214,7 @@ public class eteeAPI {
     /// the port name as a parameter.
     /// </summary>
     /// <param name="portName">string - name of the port to check</param>
-    public bool CheckPort(string portName)
+    private bool _CheckPort(string portName)
     {
         if (GetPortName() == portName)
         {
@@ -188,13 +223,19 @@ public class eteeAPI {
         return false;
     }
 
+
+    public static bool IsRightHand(int device)
+    {
+        return instance._IsRightHand(device);
+    }
+
     /// <summary>
     /// Wrapper method for checking
     /// if the device requested is
     /// the right hand.
     /// </summary>
     /// <param name="device">int - device to from where you get the data from. 0 for left and 1 for right</param>
-    public bool IsRightHand(int device)
+    private bool _IsRightHand(int device)
     {
         if (device == 0)
         {
@@ -203,15 +244,26 @@ public class eteeAPI {
         return true;
     }
 
+    public static bool IsLeftHand(int device)
+    {
+        return !instance._IsRightHand(device);
+    }
+
     // ==================================== Finger ====================================
 
+
+    public static Tuple<float, float> GetFinger(int device, int fingerIndex)
+    {
+        return instance._GetFinger(device, fingerIndex);
+    }
+    
     /// <summary>
     /// Get single finger data.
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <parma name="fingerIndex">int - finger index. The correlation is the following: 0 - Thumb, 1 - Index, 2 - Middle, 3 - Ring, 4 - Pinky</param>
     /// <returns>float</returns>
-    public Tuple<float, float> GetFinger(int device, int fingerIndex)
+    private Tuple<float, float> _GetFinger(int device, int fingerIndex)
     {
         Tuple<float, float> value = new Tuple<float, float>(0f, 0f);
 
@@ -304,13 +356,19 @@ public class eteeAPI {
 
     // ==================================== Trackpad ====================================
 
+
+    public static float GetTrackpadPositionSingleAxis(int device, char axis)
+    {
+        return instance._GetTrackpadPositionSingleAxis(device, axis);
+    }
+    
     /// <summary>
     /// Get trackpad axis value.
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <param name="axis">char - axis whose value you want to retrieve.true Values allowed are 'x' or 'y'</param>
     /// <returns>float</returns>
-    public float GetTrackpadPositionSingleAxis(int device, char axis)
+    private float _GetTrackpadPositionSingleAxis(int device, char axis)
     {
         // check that the value requested is valid.
         if (axis != 'x' && axis != 'y')
@@ -324,12 +382,17 @@ public class eteeAPI {
         }
     }
 
+    public static Vector2 GetTrackpadPosition(int device)
+    {
+        return instance._GetTrackpadPosition(device);
+    }
+    
     /// <summary>
     /// Get trackpad axis values.
     /// </sumamry>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>Vector2</returns>
-    public Vector2 GetTrackpadPosition(int device)
+    private Vector2 _GetTrackpadPosition(int device)
     {
 
         // check that parameter is correct.
@@ -341,12 +404,18 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.trackpadCoordinates : rightDevice.trackpadCoordinates;
     }
 
+
+    public static Tuple<float, float> GetTrackpadPressures(int device)
+    {
+        return instance._GetTrackpadPressures(device);
+    }
+    
     /// <summary>
     /// Get trackpad pressure values.
     /// </sumamry>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>Vector2</returns>
-    public Tuple<float, float> GetTrackpadPressures(int device)
+    private Tuple<float, float> _GetTrackpadPressures(int device)
     {
         // check that parameter is correct.
         if (device > 1 | device < 0)
@@ -357,13 +426,19 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.trackpadPressures : rightDevice.trackpadPressures;
     }
 
+    public static bool GetTrackpadTapped(int device)
+    {
+        return instance._GetTrackpadTapped(device);
+    }
+    
+
     /// <summary>
     /// Check if the trackpad
     /// has been tapped.
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>bool</returns>
-    public bool GetTrackpadTapped(int device)
+    private bool _GetTrackpadTapped(int device)
     {
 
         // check that device parameter is correct.
@@ -375,13 +450,19 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.trackpadTapped : rightDevice.trackpadTapped;
     }
 
+
+    public static Tuple<bool, bool> GetTap(int device)
+    {
+        return instance._GetTap(device);
+    }
+    
     /// <summary>
     /// Check if tap has been
     /// performed by the user.
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>void</returns>
-    public Tuple<bool, bool> GetTap(int device)
+    private Tuple<bool, bool> _GetTap(int device)
     {
 
         // check that device parameter is correct.
@@ -395,13 +476,18 @@ public class eteeAPI {
 
     // ==================================== Slider ====================================
 
+    public static float GetSliderPosition(int device)
+    {
+        return instance._GetSliderPosition(device);
+    }
+    
 
     /// <summary>
     /// Wrapper method for retrieving the Y-location value
     /// of the slider.
     /// </summary>
     /// <param name="device">int - device to from where you get the data from. 0 for left and 1 for right</param>
-    public float GetSliderPosition(int device)
+    private float _GetSliderPosition(int device)
     {
         if (device > 1)
         {
@@ -410,13 +496,20 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.sliderValue : rightDevice.sliderValue;
     }
 
+
+    public static bool GetSliderTouched(int device)
+    {
+        return instance._GetSliderTouched(device);
+    }
+    
+    
     /// <summary>
     /// Check if the Slider
     /// button is pressed.
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>bool</returns>
-    public bool GetSliderTouched(int device)
+    private bool _GetSliderTouched(int device)
     {
 
         // check that device parameter is correct.
@@ -428,12 +521,18 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.sliderButton : rightDevice.sliderButton;
     }
 
+
+    public static Tuple<bool, bool> GetSliderUpDownTouched(int device)
+    {
+        return instance._GetSliderUpDownTouched(device);
+    }
+
     /// <summary>
     /// Check if the Slider up or down buttons are pressed.
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>bool</returns>
-    public Tuple<bool, bool> GetSliderUpDownTouched(int device)
+    private Tuple<bool, bool> _GetSliderUpDownTouched(int device)
     {
         // check that device parameter is correct.
         if (device > 1)
@@ -449,13 +548,19 @@ public class eteeAPI {
 
     // ==================================== Rotation ====================================
 
+
+    public static Vector3 GetRotations(int device)
+    {
+        return instance._GetRotations(device);
+    }
+    
     /// <summary>
     /// Grabs roll, pitch and yaw rotation data from
     /// either left or right hand.
     /// </summary>
     /// <param name="device">int - device from where you get the data from. 0 for left and 1 for right</param>
     /// <returns></returns>
-    public Vector3 GetRotations(int device)
+    private Vector3 _GetRotations(int device)
     {
         // check that device parameter is correct.
         if (device > 1 | device < 0)
@@ -467,12 +572,18 @@ public class eteeAPI {
             : new Vector3(rightDevice.roll, rightDevice.pitch, rightDevice.yaw);
     }
 
+
+    public static float[] GetQuaternionValues(int device)
+    {
+        return instance._GetQuaternionValues(device);
+    }
+    
     /// <summary>
     /// Wrapper method to get all
     /// the quaternions for rotation.
     /// </summary>
     /// <param name="device">int - device to from where you get the data from. 0 for left and 1 for right</param>
-    public float[] GetQuaternionValues(int device)
+    private float[] _GetQuaternionValues(int device)
     {
 
         // get quaternions data from the get single quaternion method from the API
@@ -481,10 +592,16 @@ public class eteeAPI {
 
         for (int i = 0; i < quaternionKeys.Length; i++)
         {
-            data[i] = GetQuaternionComponent(device, quaternionKeys[i]);
+            data[i] = _GetQuaternionComponent(device, quaternionKeys[i]);
         }
 
         return data;
+    }
+
+
+    public static float GetQuaternionComponent(int device, char component)
+    {
+        return instance._GetQuaternionComponent(device, component);
     }
 
     /// <summary>
@@ -494,7 +611,7 @@ public class eteeAPI {
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <param name="component">char - component name. Values allowed are: 'x', 'y', 'z' and 'w'</param>
     /// <returns>float</returns>
-    public float GetQuaternionComponent(int device, char component)
+    private float _GetQuaternionComponent(int device, char component)
     {
 
         float value = 0f;
@@ -529,13 +646,19 @@ public class eteeAPI {
         return value;
     }
 
+    public static Quaternion GetQuaternions(int device)
+    {
+        return instance._GetQuaternions(device);
+    }
+    
+    
     /// <summary>
     /// Get quaternions data
     /// values for rotation.
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>Quaternion</returns>
-    public Quaternion GetQuaternions(int device)
+    private Quaternion _GetQuaternions(int device)
     {
 
         // check that device number is correct.
@@ -547,13 +670,20 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.quaternions : rightDevice.quaternions;
     }
 
+
+    public static Vector3 GetEuler(int device)
+    {
+        return instance._GetEuler(device);
+    }
+    
+    
     /// <summary>
     /// Get euler data
     /// for velocity.
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>Vector3</returns>
-    public Vector3 GetEuler(int device)
+    private Vector3 _GetEuler(int device)
     {
         // check that device parameter is correct.
         if (device > 1)
@@ -565,6 +695,11 @@ public class eteeAPI {
     }
 
 
+    public static float GetAccelerometerSingleAxis(int device, char axis)
+    {
+        return instance._GetAccelerometerSingleAxis(device, axis);
+    }
+
     /// <summary>
     /// Get acceleromenter axis
     /// data for velocity.
@@ -572,7 +707,7 @@ public class eteeAPI {
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <parma name="axis">char - Axis to be retrieved. Allowed values are: 'x', 'y', 'z'</param>
     /// <returns>float</returns>
-    public float GetAccelerometerSingleAxis(int device, char axis)
+    private float _GetAccelerometerSingleAxis(int device, char axis)
     {
         float value = 0f;
 
@@ -603,13 +738,20 @@ public class eteeAPI {
         return value;
     }
 
+
+    public static float[] GetAccelerometer(int device)
+    {
+        return instance._GetAccelerometer(device);
+    }
+    
+    
     /// <summary>
     /// Wraper method to get all
     /// the accelerometer values from
     /// the device.
     /// </summary>
     /// <param name="device">int - device to from where you get the data from. 0 for left and 1 for right</param>
-    public float[] GetAccelerometer(int device)
+    private float[] _GetAccelerometer(int device)
     {
         char[] keys = { 'x', 'y', 'z' };
         float[] data = new float[keys.Length];
@@ -622,13 +764,20 @@ public class eteeAPI {
         return data;
     }
 
+
+    public static Vector3 GetAccel(int device)
+    {
+        return instance._GetAccel(device);
+    }
+    
+    
     /// <summary>
     /// Get acceleromenter data
     /// for velocity.
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns>Vector3</returns>
-    public Vector3 GetAccel(int device)
+    private Vector3 _GetAccel(int device)
     {
 
         // check that device parameter is correct.
@@ -640,7 +789,13 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.accelerometer : rightDevice.accelerometer;
     }
 
-    public Vector3 GetGyro(int device)
+
+    public static Vector3 GetGyro(int device)
+    {
+        return instance._GetGyro(device);
+    }
+
+    private Vector3 _GetGyro(int device)
     {
         // check that device parameter is correct.
         if (device > 1)
@@ -655,10 +810,16 @@ public class eteeAPI {
     /// Flags both controllers gyroscopes
     /// to be calibrated.
     /// </summary>
-    public void CalibrateDevicesGyro()
+    public static void CalibrateDevicesGyro()
     {
-        leftDevice.gyroCalibrationDone = true;
-        rightDevice.gyroCalibrationDone = true;
+        instance.leftDevice.gyroCalibrationDone = true;
+        instance.rightDevice.gyroCalibrationDone = true;
+    }
+
+
+    public static bool GetIfDeviceGyroIsCalibrated(int device)
+    {
+        return instance._GetIfDeviceGyroIsCalibrated(device);
     }
 
     /// <summary>
@@ -667,7 +828,7 @@ public class eteeAPI {
     /// </summary>
     /// <param name="device">int - device number. Use 0 for left and 1 for right</param>
     /// <returns></returns>
-    public bool GetIfDeviceGyroIsCalibrated(int device)
+    private bool _GetIfDeviceGyroIsCalibrated(int device)
     {
         if (device > 1)
         {
@@ -677,7 +838,14 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.gyroCalibrated : rightDevice.gyroCalibrated;
     }
 
-    public Vector3 GetMag(int device)
+
+    public static Vector3 GetMag(int device)
+    {
+        return instance._GetMag(device);
+    }
+    
+
+    private Vector3 _GetMag(int device)
     {
         // check that device parameter is correct.
         if (device > 1)
@@ -688,12 +856,19 @@ public class eteeAPI {
         return (device == 0) ? leftDevice.magnetometer : rightDevice.magnetometer;
     }
 
+
+    public static void CalibrateDevicesMag(bool enable)
+    {
+        instance._CalibrateDevicesMag(enable);
+    }
+    
+
     /// <summary>
     /// Flags both controllers magnometer
     /// to be calibrated.
     /// </summary>
     /// <param name="enable">bool - if the magnometer enabled or not.</param>
-    public void CalibrateDevicesMag(bool enable)
+    private void _CalibrateDevicesMag(bool enable)
     {
         leftDevice.magCalibrated = !enable;
         rightDevice.magCalibrated = !enable;
@@ -829,18 +1004,17 @@ public class eteeAPI {
     /// Enables controller
     /// haptic feedback.
     /// </summary>
-    public void EnableHaptics()
+    public static void EnableHaptics()
     {
-        serialRead.EnableHaptics();
+        instance.serialRead.EnableHaptics();
     }
 
     /// <summary>
     /// Disables controller
     /// haptic feedback.
     /// </summary>
-    public void DisableHaptics()
+    public static void DisableHaptics()
     {
-        serialRead.DisableHaptics();
+        instance.serialRead.DisableHaptics();
     }
-
 }
