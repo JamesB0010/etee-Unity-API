@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -7,6 +8,7 @@ using Microsoft.Win32;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using UnityEngine.Analytics;
 
 /// <summary>
@@ -76,14 +78,14 @@ public class CSharpSerial
     private string PID = "8029";  //16-bit product number (Product ID)
 
     [Header("IMU Offsets")]
-    public Vector3 gyroLeftOffset;
-    public Vector3 gyroRightOffset;
+    public Vector3 gyroLeftOffset = new Vector3();
+    public Vector3 gyroRightOffset = new Vector3();
 
-    public Vector3 magLeftOffset;
-    public Vector3 magRightOffset;
+    public Vector3 magLeftOffset = new Vector3();
+    public Vector3 magRightOffset = new Vector3();
 
 
-    public CSharpSerial()
+    public CSharpSerial(int baudRate = 115200, int bufferSize = 43, bool looping = true, int disconnectedThreshold = 85)
     {
         // get current user operative system to detect the port where the dongle is connected.
         os = (int)System.Environment.OSVersion.Platform;
@@ -97,12 +99,16 @@ public class CSharpSerial
         
         // set data counter to initial value.
         count = 0;
+
+        this.baudRate = baudRate;
+        this.bufferSize = bufferSize;
+        this.looping = looping;
+        this.disconnectedThreshold = disconnectedThreshold;
     }
 
     // Update is called once per frame
     public void Update()
     {
-        Debug.Log("Update");
         // check if there is data to send to the devices in the queues.
         // change this method by any used in your app logic.
         ReadingQueues();
@@ -143,7 +149,6 @@ public class CSharpSerial
     /// <returns>void</returns>
     public void FixedUpdate()
     {
-        Debug.Log("Fixed Update");
         // update no device activity counters.
         UpdateDisconnectedCounters();
     }
@@ -506,23 +511,24 @@ public class CSharpSerial
     /// </summary>
     /// <param name="offset">gyroscope offset values </param>
     /// <returns></returns>
-    private IEnumerator SendCalibratedGyroOffsetLeftCoroutine(Vector3 offset)
+    private async UniTask SendCalibratedGyroOffsetLeftCoroutine(Vector3 offset)
     {
-        yield return new WaitForSeconds(0.3f);
+        await UniTask.Delay(TimeSpan.FromSeconds(0.3), DelayType.Realtime);
         string message = "BL+gf=a" + offset.x.ToString() + "," + offset.y.ToString() + "," + offset.z.ToString();
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(0.9f);
+        await UniTask.Delay(TimeSpan.FromSeconds(0.9), DelayType.Realtime);
         EnableDataStreaming();
     }
+
 
     /// <summary>
     /// Begins the calibration of the 
     /// gyroscope for left controller
     /// </summary>
     /// <param name="offset">gyroscope offset values</param>
-    public void SendCalibratedGyroOffsetLeft(Vector3 offset)
+    public async void SendCalibratedGyroOffsetLeft(Vector3 offset)
     {
-        StartCoroutine(SendCalibratedGyroOffsetLeftCoroutine(offset));
+        await this.SendCalibratedGyroOffsetLeftCoroutine(offset);
     }
 
     /// <summary>
@@ -531,12 +537,12 @@ public class CSharpSerial
     /// </summary>
     /// <param name="offset">gyroscope offset values </param>
     /// <returns></returns>
-    private IEnumerator SendCalibratedGyroOffsetRightCoroutine(Vector3 offset)
+    private async UniTask SendCalibratedGyroOffsetRightCoroutine(Vector3 offset)
     {
-        yield return new WaitForSeconds(0.5f);
+        await UniTask.Delay(TimeSpan.FromSeconds(0.5), DelayType.Realtime);
         string message = "BR+gf=a" + offset.x.ToString() + "," + offset.y.ToString() + "," + offset.z.ToString();
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(0.6f);
+        await UniTask.Delay(TimeSpan.FromSeconds(0.6), DelayType.Realtime);
     }
 
     /// <summary>
@@ -544,9 +550,9 @@ public class CSharpSerial
     /// gyroscope for right controller
     /// </summary>
     /// <param name="offset">gyroscope offset values</param>
-    public void SendCalibratedGyroOffsetRight(Vector3 offset)
+    public async void SendCalibratedGyroOffsetRight(Vector3 offset)
     {
-        StartCoroutine(SendCalibratedGyroOffsetRightCoroutine(offset));
+        await SendCalibratedGyroOffsetRightCoroutine(offset);
     }
 
     /// <summary>
@@ -555,26 +561,26 @@ public class CSharpSerial
     /// </summary>
     /// <param name="offset">Magnetometer offset values </param>
     /// <returns></returns>
-    private IEnumerator SendCalibratedMagOffsetLeftCoroutine(Vector3 offset)
+    private async UniTask SendCalibratedMagOffsetLeftCoroutine(Vector3 offset)
     {
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
         string message = "BL+mf=X" + offset.x.ToString();
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
 
         message = "BL+mf=Y" + offset.y.ToString();
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
 
         message = "BL+mf=Z" + offset.z.ToString();
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
     }
 
     /// <summary>
@@ -582,9 +588,9 @@ public class CSharpSerial
     /// magnetometer for left controller
     /// </summary>
     /// <param name="offset">Magnetometer offset values</param>
-    public void SendCalibratedMagOffsetLeft(Vector3 offset)
+    public async void SendCalibratedMagOffsetLeft(Vector3 offset)
     {
-        StartCoroutine(SendCalibratedMagOffsetLeftCoroutine(offset));
+        await SendCalibratedMagOffsetLeftCoroutine(offset);
     }
 
     /// <summary>
@@ -593,26 +599,26 @@ public class CSharpSerial
     /// </summary>
     /// <param name="offset">Magnetometer offset values </param>
     /// <returns></returns>
-    private IEnumerator SendCalibratedMagOffsetRightCoroutine(Vector3 offset)
+    private async UniTask SendCalibratedMagOffsetRightCoroutine(Vector3 offset)
     {
-        yield return new WaitForSeconds(2f);
+        await UniTask.Delay(TimeSpan.FromSeconds(2), DelayType.Realtime);
         string message = "BR+mf=X" + offset.x.ToString();
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
 
         message = "BR+mf=Y" + offset.y.ToString();
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
 
         message = "BR+mf=Z" + offset.z.ToString();
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
         SendCommandToDevice(message);
-        yield return new WaitForSeconds(1f);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime);
     }
 
     /// <summary>
@@ -620,10 +626,9 @@ public class CSharpSerial
     /// magnetometer for right controller
     /// </summary>
     /// <param name="offset">Magnetometer offset values</param>
-    public void SendCalibratedMagOffsetRight(Vector3 offset)
+    public async void SendCalibratedMagOffsetRight(Vector3 offset)
     {
-        StartCoroutine(SendCalibratedMagOffsetRightCoroutine(offset));
-
+        await SendCalibratedMagOffsetRightCoroutine(offset);
     }
 
     // ==================================== Streaming ====================================

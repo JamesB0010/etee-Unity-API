@@ -13,14 +13,8 @@ internal static class CSharpSerialBootstrapper
     private static PlayerLoopSystem serialSystemFixedUpdateLoop;
     private static PlayerLoopSystem serialSystemUpdateLoop;
     
-    
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType
-        .AfterAssembliesLoaded)] //Run this method once the assemblies are loaded
     internal static void Init()
     {
-        CSharpSerialManager.Init();
-        
-        
         var currentPlayerLoop = InsertLoopSystemsIntoPlayerloop();
 
 

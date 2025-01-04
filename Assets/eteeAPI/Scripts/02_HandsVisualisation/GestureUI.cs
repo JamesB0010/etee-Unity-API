@@ -13,7 +13,7 @@ public class GestureUI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        this.api = eteeAPI.instance;
     }
 
     // Update is called once per frame

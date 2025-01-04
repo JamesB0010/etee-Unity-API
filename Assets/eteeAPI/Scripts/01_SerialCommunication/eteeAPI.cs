@@ -5,22 +5,18 @@ using UnityEngine;
 /// Retrieves values from the API,
 /// through Get() commands.
 /// </summary>
-public class eteeAPI : MonoBehaviour {
+public class eteeAPI {
     public static eteeAPI instance;                                 // Static instance to make this API available in the whole application scope.
     public CSharpSerial serialRead;                                 // Serial reader class component reference.
     public eteeDevice leftDevice;                                   // etee left device from where the data is retrieved class component refernece.
     public eteeDevice rightDevice;                                  // etee right device from where the data is retrieved class componer reference.
 
-    /// <summary>
-    /// Awake is called when the script instance is being loaded.
-    /// </summary>
-    /// <returns>void</returns>
-    void Awake()
+    private eteeAPI() {}
+
+
+    static eteeAPI()
     {
-        if (instance == null)
-        {
-            instance = this;
-        }
+        instance = new eteeAPI();
     }
 
     /// <summary>

@@ -2,11 +2,13 @@
 using System.Collections;
 using UnityEngine;
 using AHRS;
+
+
 /// <summary>
 /// Gathers values from device data packet using UpdateValue() functions.
 /// </summary>
-public class eteeDevice : MonoBehaviour {
-
+public class eteeDevice: MonoBehaviour
+{
     [Header("Serial Communication")]
     public CSharpSerial stream;
 
@@ -14,15 +16,15 @@ public class eteeDevice : MonoBehaviour {
     public bool isLeft = false;
 
     [Header("Battery Status")]
-    public float battery;                                       // Battery value.
-    public bool chargingInProgress;
-    public bool chargingComplete;
+    public float battery = 0;                                       // Battery value.
+    public bool chargingInProgress = false;
+    public bool chargingComplete = false;
 
     [Header("Finger Data")]
-    public float[] fingerPullData = new float[5];               // Finger pull pressure array.
-    public float[] fingerForceData = new float[5];              // Finger force pressure array.
-    public bool[] fingerTouchedData = new bool[5];              // Finger touched value array.
-    public bool[] fingerClickedData = new bool[5];              // Finger clicked value array.
+    public float[] fingerPullData = new float[]{0,0,0,0,0};               // Finger pull pressure array.
+    public float[] fingerForceData = new float[]{0,0,0,0,0};              // Finger force pressure array.
+    public bool[] fingerTouchedData = new bool[]{false, false, false, false, false};              // Finger touched value array.
+    public bool[] fingerClickedData = new bool[] {false, false, false, false, false};              // Finger clicked value array.
 
     public Tuple<float, float> thumb;                            // Pressure values for thumb finger.
     public Tuple<float, float> index;                            // Pressure values for index finger.
@@ -31,25 +33,25 @@ public class eteeDevice : MonoBehaviour {
     public Tuple<float, float> pinky;                            // Pressure values for pinky finger.
 
     [Header("System Button")]
-    public bool systemButtonPressed;
+    public bool systemButtonPressed = false;
 
     [Header("Slider")]
-    public float sliderValue;                                   // Slider Y button value.
-    public bool sliderButton;
-    public bool sliderUpButton;
-    public bool sliderDownButton;
+    public float sliderValue = 0;                                   // Slider Y button value.
+    public bool sliderButton = false;
+    public bool sliderUpButton = false;
+    public bool sliderDownButton = false;
 
     [Header("Trackpad")]
-    public Vector2 trackpadCoordinates;                         // Trackpad vector2 coordinates.
+    public Vector2 trackpadCoordinates = new Vector2();                         // Trackpad vector2 coordinates.
     public Tuple<float, float> trackpadPressures;               // Trackpad vector2 pressures.
-    public bool trackpadTouched;
-    public bool trackpadClicked;
+    public bool trackpadTouched = false;
+    public bool trackpadClicked = false;
 
     [Header("Trackpad Taps")]
-    public bool trackpadTapped;
+    public bool trackpadTapped = false;
 
-    public bool tap;                                            // Tap value.
-    public bool doubleTap;
+    public bool tap = false;                                            // Tap value.
+    public bool doubleTap = false;
     public Tuple<bool, bool> taps;
     private bool prevLeftTap;
     private bool prevRightTap;
@@ -61,23 +63,23 @@ public class eteeDevice : MonoBehaviour {
     private int tapArrSize = 17;
 
     [Header("Tracker")]
-    public bool trackerConnected;                               // Tracker connection value
-    public bool proxTouched;                                    // Proximity sensor touch value
-    public bool proxClicked;                                    // Proximity sensor click value
-    public float proxValue;                                     // Proximity sensor analog value 
+    public bool trackerConnected = false;                               // Tracker connection value
+    public bool proxTouched = false;                                    // Proximity sensor touch value
+    public bool proxClicked = false;                                    // Proximity sensor click value
+    public float proxValue = 0;                                     // Proximity sensor analog value 
 
     [Header("Raw IMU")]
-    public Vector3 accelerometer;                               // Accelerometer data.
+    public Vector3 accelerometer = new Vector3();                               // Accelerometer data.
 
-    public Vector3 gyroscope;                                   // Gyroscope data.
+    public Vector3 gyroscope = new Vector3();                                   // Gyroscope data.
     public bool gyroCalibrated = false;
     public bool gyroCalibrationDone = false;
     private int gyroCalibratingSamples = 700;
     public Vector3 gyroscopeOffsetValues = Vector3.zero;
 
-    public Vector3 magnetometer;                                // Magnetometer data.
+    public Vector3 magnetometer = new Vector3();                                // Magnetometer data.
     public bool magCalibrated = true;
-    public float[] magCalibration = new float[3];
+    public float[] magCalibration = new float[]{0,0,0};
     public bool magCalibrationDone = false;
     private int magCalibratingSamples = 700;
     public Vector3 magOffsetValues = Vector3.zero;
@@ -87,44 +89,42 @@ public class eteeDevice : MonoBehaviour {
     private float[] magScale = new float[] { 1f, 1f, 1f };
 
     [Header("Device Rotation")]
-    public Quaternion quaternions;                              // Quaternion values for rotation.
+    public Quaternion quaternions = Quaternion.identity;                              // Quaternion values for rotation.
     public Quaternion offsetToHand = Quaternion.identity;
-    public Vector3 anglesOffset;
-    public Vector3 euler;
+    public Vector3 anglesOffset = new Vector3();
+    public Vector3 euler = new Vector3();
 
     private int samplesTaken = 0;
     public float samplePeriod = 100f;
     public float beta = 0.0315f;
     private MadgwickAHRS madgwickAHRS;
 
-    public float roll;
-    public float pitch;
-    public float yaw;
+    public float roll = 0;
+    public float pitch = 0;
+    public float yaw = 0;
 
     [Header("Gestures")]
-    public bool squeeze;                                        // Squeeze gesture.
-    public bool gripTouch;
-    public bool gripClick;
+    public bool squeeze = false;                                        // Squeeze gesture.
+    public bool gripTouch = false;
+    public bool gripClick = false;
     public Tuple<float, float> gripPressures;
 
-    public bool pointIndependent;                               // Point Independent gesture boolean
-    public float pointIndependentAnalog;                        // Point Independent gesture analog
+    public bool pointIndependent = false;                               // Point Independent gesture boolean
+    public float pointIndependentAnalog = 0;                        // Point Independent gesture analog
 
-    public bool pointExcludeTrackpad;                           // Point Exclude Trackpad gesture boolean
-    public float pointExcludeTrackpadAnalog;                    // Point Exclude Trackpad gesture analog
+    public bool pointExcludeTrackpad = false;                           // Point Exclude Trackpad gesture boolean
+    public float pointExcludeTrackpadAnalog = 0;                    // Point Exclude Trackpad gesture analog
 
-    public bool pinchTrackpad;                                  // Pinch trackpad gesture boolean
-    public float pinchTrackpadAnalog;                             // Pinch trackpad gesture analog
+    public bool pinchTrackpad = false;                                  // Pinch trackpad gesture boolean
+    public float pinchTrackpadAnalog = 0;                             // Pinch trackpad gesture analog
 
-    public bool pinchThumbFinger;                               // Pinch thumbFinger gesture boolean
-    public float pinchThumbFingerAnalog;                          // Pinch thumbFinger gesture analog
+    public bool pinchThumbFinger = false;                               // Pinch thumbFinger gesture boolean
+    public float pinchThumbFingerAnalog = 0;                          // Pinch thumbFinger gesture analog
 
     [Header("Flags")]
     public bool enable = false;
     public bool handSmoothing = true;
 
-
-    // start is called at the first frame before update.
     private void Start()
     {
         ResetValues();
@@ -134,8 +134,9 @@ public class eteeDevice : MonoBehaviour {
         rightTapArr = new bool[tapArrSize];
         pastLeftTapTime = Time.time;
         pastRightTapTime = Time.time;
-
+        
         madgwickAHRS = new MadgwickAHRS(1 / samplePeriod, beta);
+        DontDestroyOnLoad(this.gameObject);
     }
 
 

@@ -7,8 +7,8 @@ using UnityEngine;
 /// </summary>
 public class HandController : MonoBehaviour {
 
-    public eteeDevice device;
-    public eteeAPI api;
+    [HideInInspector] public eteeDevice device = null;
+    public eteeAPI api = null;
 
     public bool isLeft;
     private Quaternion defaultHandPosition = Quaternion.identity;
@@ -207,8 +207,11 @@ public class HandController : MonoBehaviour {
     /// <summary>
     /// Initalises the Hand Controller class.
     /// </summary>
-    private void Init() {
-
+    private void Init()
+    {
+        this.api = eteeAPI.instance;
+        this.device = this.isLeft ? this.api.leftDevice : this.api.rightDevice;
+        
         // get animator component from the hand gameObject.
         anim = GetComponent<Animator>();
 

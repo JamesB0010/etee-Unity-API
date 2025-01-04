@@ -6,12 +6,12 @@ using UnityEngine;
 public static class CSharpSerialManager
 {
     private static CSharpSerial cSharpSerial;
+    public static CSharpSerial CSharpSerial => cSharpSerial;
 
-    internal static void Init()
+    static CSharpSerialManager()
     {
         CSharpSerialManager.cSharpSerial = new CSharpSerial();
     }
-
     public static void FixedUpdateSerial() => CSharpSerialManager.cSharpSerial.FixedUpdate();
 
     public static void UpdateSerial() => CSharpSerialManager.cSharpSerial.Update();
