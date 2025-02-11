@@ -6,12 +6,9 @@ using UnityEngine;
 
 public static class CSharpSerialManager
 {
-    private static CSharpSerial cSharpSerial;
-    public static CSharpSerial CSharpSerial => cSharpSerial;
-    static CSharpSerialManager()
-    {
-        cSharpSerial = new CSharpSerial();
-    }
+    private static I_CSharpSerial cSharpSerial;
+    public static I_CSharpSerial CSharpSerial => cSharpSerial;
+    public static void SetCSharpSerial(I_CSharpSerial s) => CSharpSerialManager.cSharpSerial = s;
 
     /// <summary>
     /// This method is injected as a child system of the fixed update system in the UnityEngine Player

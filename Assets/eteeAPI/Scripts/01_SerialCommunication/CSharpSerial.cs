@@ -15,17 +15,17 @@ using UnityEngine.Analytics;
 /// Retrieves device and port statuses. Also initialises 
 /// device calibration and data streaming commands.
 /// </summary>
-public class CSharpSerial
+public class CSharpSerial : I_CSharpSerial
 {
     Thread thread;                                              // Separate thread used to read bytes data from the dongle.
     SerialPort stream;                                          // Stream object for connecting the UI to the dongle. This connection is being handle in a different thread.
 
-    [Header("etee Devices")]
-    public eteeDevice leftDevice;                               // etee API left device.
-    public eteeDevice rightDevice;                              // etee API right device.
+    //etee devices
+    public eteeDevice leftDevice { get; set; }                               // etee API left device.
+    public eteeDevice rightDevice { get; set; }                              // etee API right device.
 
-    [Header("Serial communication")]
-    public string serialPort;                                   // Serial port name used to connect to the dongle.
+    //Serial Communication
+    public string serialPort { get; set; }                                   // Serial port name used to connect to the dongle.
     public int baudRate;                                        // Baud rate number used to establish the connection to the dongle.
     public int bufferSize;                                      // Max amount of bytes to stack in the buffer.
 
@@ -83,6 +83,7 @@ public class CSharpSerial
 
     public Vector3 magLeftOffset = new Vector3();
     public Vector3 magRightOffset = new Vector3();
+    public bool SuppressCommandSentDebugLog { get; set; }
 
 
     public CSharpSerial(int baudRate = 115200, int bufferSize = 43, bool looping = true, int disconnectedThreshold = 85)
@@ -649,7 +650,10 @@ public class CSharpSerial
             {
                 streamingData = true;
             }
-            Debug.Log("Command sent to devices: " + command);
+
+            if (!SuppressCommandSentDebugLog)
+                Debug.Log("Command sent to devices: " + command);
+                
             stream.WriteLine(command);
             stream.BaseStream.Flush();
         }
@@ -951,7 +955,6 @@ public class CSharpSerial
         }
         streamingData = false;
     }
-
 
 
     /// <summary>

@@ -10,7 +10,7 @@ using AHRS;
 public class eteeDevice: MonoBehaviour
 {
     [Header("Serial Communication")]
-    public CSharpSerial stream;
+    public I_CSharpSerial stream;
 
     [Header("Handedness")]
     public bool isLeft = false;
