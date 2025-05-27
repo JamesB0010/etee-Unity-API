@@ -121,6 +121,7 @@ namespace eteePlayerLoop
         }
 
 
+        #if UNITY_EDITOR
         private static void OnPlayModeChanged(PlayModeStateChange state)
         {
             if (state == PlayModeStateChange.ExitingPlayMode)
@@ -135,7 +136,8 @@ namespace eteePlayerLoop
                 CSharpSerialManager.Clear();
             }
         }
-
+        #endif
+        
         private static PlayerLoopSystem RemoveCSharpSerialManager()
         {
             PlayerLoopSystem currentPlayerloop = PlayerLoop.GetCurrentPlayerLoop();

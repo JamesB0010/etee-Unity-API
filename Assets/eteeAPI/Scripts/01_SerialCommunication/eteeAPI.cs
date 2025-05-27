@@ -1232,4 +1232,11 @@ public class eteeAPI
     {
         instance.serialRead.DisableHaptics();
     }
+
+    public static void VibrateDevice(int deviceIndex)
+    {
+        string hand = deviceIndex == 0 ? "left" : "right";
+        
+        instance.serialRead.SendVibrationsCommands(hand);
+    }
 }

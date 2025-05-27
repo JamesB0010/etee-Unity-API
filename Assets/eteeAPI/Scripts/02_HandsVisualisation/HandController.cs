@@ -150,7 +150,13 @@ public class HandController : MonoBehaviour {
             interpLocalRot.z = Mathf.Lerp(oldLocalRot.z, newLocalRot.z, interp);
             interpLocalRot.w = Mathf.Lerp(oldLocalRot.w, newLocalRot.w, interp);
 
+            interpLocalRot.y = 0;
+            interpLocalRot.z = 0;
             transform.localRotation = interpLocalRot;
+            
+            Debug.Log(Vector3.Dot(Vector3.up, transform.forward));
+            
+            Debug.DrawRay(transform.position, transform.forward);
         }
         UpdateFingerData(isLeft? 0:1);
     }
